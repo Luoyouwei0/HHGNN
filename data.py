@@ -224,7 +224,7 @@ def get_GDSC_data(file_name):
         with open(pkl_path, 'rb') as f:
             data = pickle.load(f)
         return data
-    df = pd.read_csv(file_name,nrows=10000)
+    df = pd.read_csv(file_name,nrows=20000)
     data = HeteroData()
     v_types = ['TX_ID', 'SENDER_ACCOUNT_ID', 'RECEIVER_ACCOUNT_ID', 'TX_TYPE', 'TX_AMOUNT', 'TIMESTAMP', 'IS_FRAUD']
     tx_id_str, sender_str, receiver_str, type_str, amount_str, timestamp_str, label_str = (

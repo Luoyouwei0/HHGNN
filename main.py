@@ -9,24 +9,22 @@ from util import *
 
 path="./data/AMLWorld/dataset/HI-Large_Trans.csv"
 gdsc_path="./dataset.csv"
-epochs=100
-hidden_channels=64
+epochs=10000
+hidden_channels=16
 out_channels=2
 num_heads=2
-num_layers=3
-lr=0.002
+num_layers=10
+lr=0.00003
 weight_decay=0.000
 model_path="./model.pth"
-
-
+if torch.cuda.is_available():
+    torch.cuda.empty_cache() 
 data=get_GDSC_data(gdsc_path)
 model = HGT(hidden_channels=hidden_channels, out_channels=out_channels, num_heads=num_heads, num_layers=num_layers,data=data)
 if os.path.exists(model_path):
     model=torch.load("./model.pth", weights_only=False)
 device=get_device()
 data, model = data.to(device), model.to(device)
-# with torch.no_grad():  # Initialize lazy modules.
-#     out = model(data.x_dict, data.edge_index_dict)
 optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
 
@@ -37,10 +35,9 @@ def train():
     out = model(data.x_dict, data.edge_index_dict)
     mask = data['virtual'].train_mask
     num_pos = (data['virtual'].y[mask]== 1).sum().float()
-    print("num_pos: ", num_pos)
     num_neg = (data['virtual'].y[mask]== 0).sum().float()
-    print("num_neg: ", num_neg)
     weight = torch.tensor([1.0, num_neg / num_pos])
+    weight=weight.to(device)
     loss = F.cross_entropy(out[mask], data['virtual'].y[mask],weight=weight,reduction='mean')
     loss.backward()
     optimizer.step()
